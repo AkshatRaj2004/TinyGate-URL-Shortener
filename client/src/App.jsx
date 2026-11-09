@@ -39,23 +39,20 @@ const App = () => (
     </BrowserRouter>
 
     <Toaster
-      position="top-right"
+      position="bottom-right"
       toastOptions={{
-        duration: 3500,
+        duration: 3000,
         style: {
-          background: '#1a1a2e',
-          color: '#f3f4f6',
-          border: '1px solid rgba(147,51,234,0.25)',
-          borderRadius: '12px',
-          fontSize: '14px',
-          backdropFilter: 'blur(12px)',
+          background: 'rgb(var(--surface))',
+          color: 'rgb(var(--fg))',
+          border: '1px solid rgb(var(--line))',
+          borderRadius: '8px',
+          boxShadow: '0 8px 24px -6px rgb(0 0 0 / 0.12)',
+          fontSize: '13px',
+          padding: '8px 12px',
         },
-        success: {
-          iconTheme: { primary: '#10b981', secondary: '#1a1a2e' },
-        },
-        error: {
-          iconTheme: { primary: '#ef4444', secondary: '#1a1a2e' },
-        },
+        success: { iconTheme: { primary: 'rgb(var(--success))', secondary: 'rgb(var(--surface))' } },
+        error:   { iconTheme: { primary: 'rgb(var(--danger))',  secondary: 'rgb(var(--surface))' } },
       }}
     />
   </AuthProvider>

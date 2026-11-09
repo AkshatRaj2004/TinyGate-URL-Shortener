@@ -1,47 +1,43 @@
 import { useEffect } from 'react';
+import { createPortal } from 'react-dom';
+import { X } from 'lucide-react';
 
-const Modal = ({ isOpen, onClose, title, children, maxWidth = 'max-w-lg' }) => {
+const Modal = ({ isOpen, onClose, title, description, children, maxWidth = 'max-w-md' }) => {
   useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
+    if (!isOpen) return undefined;
+    const onKey = (e) => e.key === 'Escape' && onClose?.();
+    document.body.style.overflow = 'hidden';
+    window.addEventListener('keydown', onKey);
+    return () => {
       document.body.style.overflow = '';
-    }
-    return () => { document.body.style.overflow = ''; };
-  }, [isOpen]);
+      window.removeEventListener('keydown', onKey);
+    };
+  }, [isOpen, onClose]);
 
   if (!isOpen) return null;
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      {/* Backdrop */}
+  return createPortal(
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4">
+      <div className="absolute inset-0 bg-black/40 animate-fade-in" onClick={onClose} />
       <div
-        className="absolute inset-0 bg-black/70 backdrop-blur-sm animate-fade-in"
-        onClick={onClose}
-      />
-
-      {/* Panel */}
-      <div className={`relative w-full ${maxWidth} glass rounded-2xl shadow-glass-lg animate-slide-up overflow-hidden`}>
-        {/* Top accent line */}
-        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-purple-500/60 to-transparent" />
-
-        {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-white/8">
-          <h2 className="text-base font-semibold text-white">{title}</h2>
-          <button
-            onClick={onClose}
-            className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:text-white hover:bg-white/10 transition-all"
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
+        role="dialog"
+        aria-modal="true"
+        aria-label={title}
+        className={`relative w-full ${maxWidth} card shadow-pop animate-pop-in`}
+      >
+        <div className="flex items-start justify-between gap-4 px-5 pt-5">
+          <div>
+            <h2 className="text-[15px] font-semibold text-fg">{title}</h2>
+            {description && <p className="text-sm text-muted mt-1">{description}</p>}
+          </div>
+          <button onClick={onClose} className="icon-btn -mr-1.5 -mt-1" aria-label="Close">
+            <X className="w-4 h-4" />
           </button>
         </div>
-
-        {/* Body */}
-        <div className="px-6 py-5">{children}</div>
+        <div className="p-5">{children}</div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 

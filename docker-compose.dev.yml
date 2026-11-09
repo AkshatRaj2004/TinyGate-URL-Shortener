@@ -1,0 +1,24 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+#  TinyGate — MongoDB only, for local development.
+#  Started automatically by `npm run local` when no MongoDB is reachable.
+#  Stop it with: npm run local:stop
+# ═══════════════════════════════════════════════════════════════════════════════
+
+services:
+  mongo:
+    image: mongo:7.0
+    container_name: tinygate_mongo_dev
+    restart: unless-stopped
+    ports:
+      - '27017:27017'
+    volumes:
+      - tinygate_mongo_dev_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
+      interval: 3s
+      timeout: 5s
+      retries: 20
+      start_period: 5s
+
+volumes:
+  tinygate_mongo_dev_data:

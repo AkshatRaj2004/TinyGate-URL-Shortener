@@ -1,33 +1,41 @@
 import { useState, useEffect, useMemo } from 'react';
-import { urlAPI } from '../api/url';
-import UrlCard from '../components/dashboard/UrlCard';
-import { Spinner } from '../components/ui/Loader';
+import { Link } from 'react-router-dom';
+import { ChevronLeft, ChevronRight, Plus, Search } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { urlAPI } from '../api/url';
+import LinksTable, { EmptyState } from '../components/dashboard/LinksTable';
+import PageHeader from '../components/ui/PageHeader';
+import { isExpired } from '../utils/helpers';
+
+const LIMIT = 20;
+const FILTERS = ['all', 'active', 'expired'];
 
 const Links = () => {
   const [urls, setUrls]       = useState([]);
+  const [total, setTotal]     = useState(0);
+  const [page, setPage]       = useState(1);
   const [loading, setLoading] = useState(true);
   const [search, setSearch]   = useState('');
   const [filter, setFilter]   = useState('all');
-  const [page, setPage]       = useState(1);
-  const [total, setTotal]     = useState(0);
 
-  const LIMIT = 15;
+  useEffect(() => {
+    let cancelled = false;
+    urlAPI.getAll({ page, limit: LIMIT })
+      .then(({ data }) => {
+        if (cancelled) return;
+        setUrls(data.data || []);
+        setTotal(data.total || 0);
+      })
+      .catch(() => !cancelled && toast.error('Could not load your links'))
+      .finally(() => !cancelled && setLoading(false));
+    return () => { cancelled = true; };
+  }, [page]);
 
-  const fetchUrls = async (p = 1) => {
+  const goTo = (p) => {
+    if (p === page) return;
     setLoading(true);
-    try {
-      const { data } = await urlAPI.getAll({ page: p, limit: LIMIT });
-      setUrls(data.data || []);
-      setTotal(data.total || 0);
-    } catch {
-      toast.error('Failed to load links');
-    } finally {
-      setLoading(false);
-    }
+    setPage(p);
   };
-
-  useEffect(() => { fetchUrls(page); }, [page]);
 
   const handleDelete = async (id) => {
     await urlAPI.deleteUrl(id);
@@ -36,96 +44,89 @@ const Links = () => {
   };
 
   const filtered = useMemo(() => {
-    const now = new Date();
+    const q = search.trim().toLowerCase();
     return urls
-      .filter((u) => {
-        if (filter === 'active')  return !u.expiresAt || new Date(u.expiresAt) > now;
-        if (filter === 'expired') return u.expiresAt && new Date(u.expiresAt) <= now;
-        return true;
-      })
-      .filter((u) => {
-        if (!search.trim()) return true;
-        const q = search.toLowerCase();
-        return u.originalUrl.toLowerCase().includes(q) || u.shortCode.toLowerCase().includes(q);
-      });
+      .filter((u) => (filter === 'all' ? true : filter === 'expired' ? isExpired(u) : !isExpired(u)))
+      .filter((u) => !q || u.originalUrl.toLowerCase().includes(q) || u.shortCode.toLowerCase().includes(q));
   }, [urls, filter, search]);
 
-  const pages = Math.ceil(total / LIMIT);
+  const pages = Math.max(1, Math.ceil(total / LIMIT));
+  const from  = total === 0 ? 0 : (page - 1) * LIMIT + 1;
+  const to    = Math.min(page * LIMIT, total);
 
   return (
-    <div className="space-y-6 animate-fade-in">
-      <div>
-        <h1 className="text-2xl font-bold text-white">My Links</h1>
-        <p className="text-gray-400 text-sm mt-1">{total} total links in your account</p>
-      </div>
+    <div>
+      <PageHeader
+        title="Links"
+        description={`${total} link${total === 1 ? '' : 's'} in your account`}
+        actions={
+          <Link to="/dashboard" className="btn-primary btn-sm self-start sm:self-auto">
+            <Plus className="w-4 h-4" />
+            New link
+          </Link>
+        }
+      />
 
-      {/* Controls */}
-      <div className="flex flex-col sm:flex-row gap-3">
-        <div className="relative flex-1">
-          <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-          </svg>
+      <div className="flex flex-col sm:flex-row gap-2 mb-3">
+        <div className="relative flex-1 sm:max-w-xs">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-faint pointer-events-none" />
           <input
-            type="text"
-            placeholder="Search by URL or short code…"
+            type="search"
+            placeholder="Search by URL or code"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="input-glass pl-9 text-sm"
+            className="input pl-9"
+            aria-label="Search links"
           />
         </div>
-        <div className="flex items-center glass rounded-xl p-1 gap-1">
-          {['all', 'active', 'expired'].map((f) => (
-            <button
-              key={f}
-              onClick={() => setFilter(f)}
-              className={`px-4 py-2 rounded-lg text-xs font-medium capitalize transition-all ${
-                filter === f
-                  ? 'bg-purple-600/30 text-purple-300 border border-purple-500/30'
-                  : 'text-gray-500 hover:text-white'
-              }`}
-            >
+        <div className="segmented self-start" role="group" aria-label="Filter by status">
+          {FILTERS.map((f) => (
+            <button key={f} type="button" aria-pressed={filter === f} onClick={() => setFilter(f)}>
               {f}
             </button>
           ))}
         </div>
       </div>
 
-      {/* List */}
-      {loading ? (
-        <div className="flex items-center justify-center py-20"><Spinner size="lg" /></div>
-      ) : filtered.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-20 glass rounded-2xl text-center">
-          <p className="text-gray-400 font-medium">{search ? 'No results found' : 'No links yet'}</p>
-          <p className="text-gray-600 text-sm mt-1">{search ? 'Try another search term' : 'Go to dashboard to create your first link'}</p>
-        </div>
-      ) : (
-        <div className="space-y-3">
-          {filtered.map((url) => (
-            <UrlCard key={url._id} url={url} onDelete={handleDelete} />
-          ))}
-        </div>
-      )}
+      <LinksTable
+        urls={filtered}
+        loading={loading}
+        onDelete={handleDelete}
+        skeletonRows={6}
+        empty={
+          search || filter !== 'all' ? (
+            <EmptyState title="No matching links" body="Try a different search term or filter." />
+          ) : (
+            <EmptyState
+              title="No links yet"
+              body="Short links you create will show up here."
+              action={<Link to="/dashboard" className="btn-secondary btn-sm">Create a link</Link>}
+            />
+          )
+        }
+      />
 
-      {/* Pagination */}
-      {pages > 1 && (
-        <div className="flex items-center justify-center gap-2 pt-2">
-          <button
-            onClick={() => setPage((p) => Math.max(1, p - 1))}
-            disabled={page === 1}
-            className="btn-ghost text-sm px-4 py-2 disabled:opacity-40"
-          >
-            ← Prev
-          </button>
-          <span className="text-gray-500 text-sm px-3">
-            {page} / {pages}
-          </span>
-          <button
-            onClick={() => setPage((p) => Math.min(pages, p + 1))}
-            disabled={page === pages}
-            className="btn-ghost text-sm px-4 py-2 disabled:opacity-40"
-          >
-            Next →
-          </button>
+      {total > LIMIT && (
+        <div className="flex items-center justify-between mt-3 text-[13px] text-muted">
+          <span className="tabular-nums">{from}–{to} of {total}</span>
+          <div className="flex items-center gap-1">
+            <button
+              onClick={() => goTo(Math.max(1, page - 1))}
+              disabled={page === 1 || loading}
+              className="btn-secondary btn-sm px-2"
+              aria-label="Previous page"
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => goTo(Math.min(pages, page + 1))}
+              disabled={page === pages || loading}
+              className="btn-secondary btn-sm px-2"
+              aria-label="Next page"
+            >
+              <ChevronRight className="w-4 h-4" />
+            </button>
+          </div>
         </div>
       )}
     </div>

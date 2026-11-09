@@ -260,6 +260,35 @@ The repository includes:
 
 ## 💻 Local Development
 
+### ⚡ Quick start (one command)
+
+Requires Node.js 18+. Docker Desktop is only needed if you don't already have MongoDB running locally (or an Atlas URI in `.env`).
+
+```bash
+npm run local
+```
+
+This will:
+
+- create `.env` from `.env.example` on first run (local MongoDB, random JWT secret)
+- install API and client dependencies if they are missing
+- start MongoDB in Docker (`docker-compose.dev.yml`) **only** if nothing is listening on the configured local port
+- run the API on http://localhost:5000 and the web app on http://localhost:3000 (Ctrl+C stops both)
+
+Optional demo data — creates `demo@tinygate.local` / `DemoPass123` with sample links and clicks:
+
+```bash
+npm run local:seed
+```
+
+Stop the MongoDB container when you're done:
+
+```bash
+npm run local:stop
+```
+
+### Manual setup
+
 ### Prerequisites
 
 Make sure the following are installed:

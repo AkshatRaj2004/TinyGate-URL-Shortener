@@ -1,213 +1,170 @@
 import { Link } from 'react-router-dom';
+import {
+  ArrowRight, BarChart3, CalendarClock, KeyRound, PenLine, QrCode, Zap,
+} from 'lucide-react';
 import Navbar from '../components/layout/Navbar';
+import { LogoMark } from '../components/ui/Logo';
+import { useAuth } from '../context/AuthContext';
 
 const FEATURES = [
-  {
-    icon: (
-      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8}
-          d="M13 10V3L4 14h7v7l9-11h-7z" />
-      </svg>
-    ),
-    title: 'Instant Shortening',
-    desc: 'Generate short, memorable links in milliseconds with our blazing-fast API.',
-    gradient: 'from-purple-500/20 to-violet-500/20',
-    border: 'border-purple-500/20',
-    iconColor: 'text-purple-400',
-  },
-  {
-    icon: (
-      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8}
-          d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-      </svg>
-    ),
-    title: 'Deep Analytics',
-    desc: 'Track every click with browser, device, OS, and geographic breakdowns.',
-    gradient: 'from-indigo-500/20 to-blue-500/20',
-    border: 'border-indigo-500/20',
-    iconColor: 'text-indigo-400',
-  },
-  {
-    icon: (
-      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8}
-          d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
-      </svg>
-    ),
-    title: 'QR Code Generator',
-    desc: 'Instantly generate downloadable QR codes for every shortened link.',
-    gradient: 'from-emerald-500/20 to-teal-500/20',
-    border: 'border-emerald-500/20',
-    iconColor: 'text-emerald-400',
-  },
-  {
-    icon: (
-      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8}
-          d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-      </svg>
-    ),
-    title: 'Custom Aliases',
-    desc: 'Create branded short links with your own custom alias slugs.',
-    gradient: 'from-pink-500/20 to-rose-500/20',
-    border: 'border-pink-500/20',
-    iconColor: 'text-pink-400',
-  },
-  {
-    icon: (
-      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8}
-          d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-      </svg>
-    ),
-    title: 'Link Expiry',
-    desc: 'Set automatic expiry dates so your links deactivate exactly when you need.',
-    gradient: 'from-amber-500/20 to-orange-500/20',
-    border: 'border-amber-500/20',
-    iconColor: 'text-amber-400',
-  },
-  {
-    icon: (
-      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8}
-          d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-      </svg>
-    ),
-    title: 'Enterprise Security',
-    desc: 'Secured with JWT auth, rate limiting, helmet, and CORS protection.',
-    gradient: 'from-cyan-500/20 to-sky-500/20',
-    border: 'border-cyan-500/20',
-    iconColor: 'text-cyan-400',
-  },
+  { icon: Zap,           title: 'Fast redirects',   body: 'Short codes resolve with a single indexed lookup. Click data is written after the redirect, so visitors never wait on it.' },
+  { icon: BarChart3,     title: 'Click analytics',  body: 'Daily clicks, devices, browsers, operating systems and referrers for every link.' },
+  { icon: PenLine,       title: 'Custom aliases',   body: 'Pick a readable slug like /launch instead of a random code.' },
+  { icon: CalendarClock, title: 'Expiry dates',     body: 'Links stop redirecting at the time you set. Useful for campaigns and one-off shares.' },
+  { icon: QrCode,        title: 'QR codes',         body: 'Generate and download a QR code for any link, ready for print.' },
+  { icon: KeyRound,      title: 'Private by default', body: 'JWT auth, per-user links, rate limiting and hardened HTTP headers.' },
 ];
 
-const Home = () => (
-  <div className="min-h-screen">
-    <Navbar />
+const PREVIEW = [
+  { code: 'launch',  dest: 'github.com/acme/release-notes/v2',      clicks: 1284 },
+  { code: 'q4-deck', dest: 'docs.google.com/presentation/d/1x9…',   clicks: 412 },
+  { code: 'Xk9pQ2r', dest: 'example.com/blog/how-we-cut-latency',   clicks: 97 },
+];
 
-    {/* ── Hero ────────────────────────────────────────────────────────────── */}
-    <section className="relative pt-32 pb-20 px-4 sm:px-6 overflow-hidden">
-      {/* Background blobs */}
-      <div className="absolute top-20 left-1/4 w-96 h-96 bg-purple-700/20 rounded-full blur-3xl animate-blob pointer-events-none" />
-      <div className="absolute top-40 right-1/4 w-80 h-80 bg-indigo-700/15 rounded-full blur-3xl animate-blob animation-delay-2000 pointer-events-none" />
-      <div className="absolute bottom-0 left-1/2 w-64 h-64 bg-violet-700/10 rounded-full blur-3xl animate-blob animation-delay-4000 pointer-events-none" />
+// Two weeks of made-up daily clicks for the preview sparkline.
+const SPARK = [12, 18, 15, 22, 30, 26, 41, 38, 35, 52, 48, 61, 57, 70];
 
-      <div className="max-w-4xl mx-auto text-center relative z-10">
-        {/* Badge */}
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full glass border border-purple-500/20 text-sm text-purple-300 mb-8 animate-fade-in">
-          <span className="w-2 h-2 rounded-full bg-purple-400 animate-pulse" />
-          Production-ready URL Shortener
+const Sparkline = () => {
+  const w = 280, h = 64, max = Math.max(...SPARK);
+  const pts = SPARK.map((v, i) => [(i / (SPARK.length - 1)) * w, h - (v / max) * (h - 6) - 3]);
+  const line = pts.map(([x, y], i) => `${i ? 'L' : 'M'}${x.toFixed(1)},${y.toFixed(1)}`).join(' ');
+  return (
+    <svg viewBox={`0 0 ${w} ${h}`} className="w-full h-16" preserveAspectRatio="none" aria-hidden="true">
+      <path d={`${line} L${w},${h} L0,${h} Z`} className="fill-accent/10" />
+      <path d={line} fill="none" className="stroke-accent" strokeWidth="1.75" vectorEffect="non-scaling-stroke" />
+    </svg>
+  );
+};
+
+const ProductPreview = () => (
+  <div className="card shadow-pop overflow-hidden text-left" aria-hidden="true">
+    <div className="flex items-center gap-1.5 px-4 h-10 border-b border-line bg-subtle/50">
+      <span className="w-2.5 h-2.5 rounded-full bg-line-strong" />
+      <span className="w-2.5 h-2.5 rounded-full bg-line-strong" />
+      <span className="w-2.5 h-2.5 rounded-full bg-line-strong" />
+      <span className="ml-3 font-mono text-2xs text-faint">tinygate.tech/dashboard</span>
+    </div>
+    <div className="p-4 border-b border-line">
+      <div className="flex items-baseline justify-between">
+        <div>
+          <p className="text-2xs text-muted">Clicks · last 14 days</p>
+          <p className="text-xl font-semibold tabular-nums mt-0.5">1,793</p>
         </div>
-
-        {/* Heading */}
-        <h1 className="text-5xl sm:text-6xl lg:text-7xl font-extrabold leading-tight tracking-tight mb-6 animate-slide-up">
-          Shorten Links.{' '}
-          <span className="text-gradient">Track Everything.</span>
-        </h1>
-
-        <p className="text-lg sm:text-xl text-gray-400 max-w-2xl mx-auto mb-10 text-balance animate-slide-up animation-delay-200">
-          Tiny Gate is a blazing-fast URL shortener with real-time analytics,
-          QR code generation, custom aliases, and enterprise-grade security — all in one platform.
-        </p>
-
-        {/* CTA */}
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-slide-up animation-delay-400">
-          <Link to="/register" className="btn-accent text-base px-8 py-3.5 shadow-accent">
-            Start for Free
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-            </svg>
-          </Link>
-          <Link to="/login" className="btn-ghost text-base px-8 py-3.5">
-            Sign In
-          </Link>
-        </div>
-
-        {/* Social proof */}
-        <p className="text-xs text-gray-600 mt-8 animate-fade-in animation-delay-600">
-          No credit card required &nbsp;·&nbsp; Free forever plan &nbsp;·&nbsp; 99.9% uptime
-        </p>
+        <span className="text-2xs font-medium text-success tabular-nums">+38%</span>
       </div>
-
-      {/* Demo card */}
-      <div className="max-w-2xl mx-auto mt-16 relative z-10 animate-slide-up animation-delay-400">
-        <div className="glass rounded-2xl p-5 shadow-glass-lg border-accent-glow">
-          <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-purple-500/60 to-transparent rounded-t-2xl" />
-          <p className="text-xs text-gray-500 mb-3 uppercase tracking-wider font-medium">Try it now</p>
-          <div className="flex gap-3">
-            <input
-              readOnly
-              defaultValue="https://www.example.com/very/long/path/that/nobody/wants-to-share"
-              className="input-glass flex-1 text-sm text-gray-400"
-            />
-            <Link to="/register" className="btn-accent text-sm px-5 flex-shrink-0">Shorten</Link>
+      <div className="mt-2"><Sparkline /></div>
+    </div>
+    <ul>
+      {PREVIEW.map((r) => (
+        <li key={r.code} className="flex items-center gap-3 px-4 py-2.5 border-t border-line first:border-t-0">
+          <div className="min-w-0 flex-1">
+            <p className="font-mono text-[13px] font-medium truncate">tinygate.tech/{r.code}</p>
+            <p className="text-2xs text-muted truncate">{r.dest}</p>
           </div>
-          <div className="mt-3 flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/3 border border-white/6">
-            <span className="text-xs text-gray-500">Short URL:</span>
-            <span className="text-sm text-purple-400 font-mono">tinygate.app/xK9pQ2r</span>
-            <span className="ml-auto badge-success">Active</span>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    {/* ── Features ────────────────────────────────────────────────────────── */}
-    <section className="py-20 px-4 sm:px-6">
-      <div className="max-w-6xl mx-auto">
-        <div className="text-center mb-14">
-          <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
-            Everything you need to manage links
-          </h2>
-          <p className="text-gray-400 max-w-xl mx-auto">
-            Packed with powerful features that help marketers, developers, and teams
-            work smarter with their links.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {FEATURES.map((f) => (
-            <div
-              key={f.title}
-              className={`glass-hover rounded-2xl p-6 bg-gradient-to-br ${f.gradient} border ${f.border}`}
-            >
-              <div className={`w-12 h-12 rounded-xl glass flex items-center justify-center mb-4 ${f.iconColor}`}>
-                {f.icon}
-              </div>
-              <h3 className="text-base font-semibold text-white mb-2">{f.title}</h3>
-              <p className="text-sm text-gray-400 leading-relaxed">{f.desc}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-
-    {/* ── CTA Banner ─────────────────────────────────────────────────────── */}
-    <section className="py-20 px-4 sm:px-6">
-      <div className="max-w-4xl mx-auto">
-        <div className="relative glass rounded-3xl p-10 sm:p-14 text-center overflow-hidden border-accent-glow">
-          <div className="absolute inset-0 bg-gradient-to-br from-purple-900/30 to-indigo-900/20 pointer-events-none" />
-          <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-purple-500/60 to-transparent" />
-          <div className="relative z-10">
-            <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
-              Ready to shorten smarter?
-            </h2>
-            <p className="text-gray-400 mb-8 max-w-xl mx-auto">
-              Join and start tracking your links with powerful analytics today. Free to start.
-            </p>
-            <Link to="/register" className="btn-accent text-base px-10 py-3.5 shadow-accent-lg">
-              Create Free Account →
-            </Link>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    {/* ── Footer ──────────────────────────────────────────────────────────── */}
-    <footer className="border-t border-white/5 py-8 px-4 text-center text-sm text-gray-600">
-      © {new Date().getFullYear()} Tiny Gate. Built with Node.js, React &amp; MongoDB.
-    </footer>
+          <span className="text-[13px] tabular-nums">{r.clicks.toLocaleString()}</span>
+        </li>
+      ))}
+    </ul>
   </div>
 );
+
+const Home = () => {
+  const { isAuthenticated } = useAuth();
+
+  return (
+    <div className="min-h-screen flex flex-col">
+      <Navbar />
+
+      <main className="flex-1">
+        {/* Hero */}
+        <section className="max-w-6xl mx-auto px-4 sm:px-6 pt-16 sm:pt-24 pb-20 grid lg:grid-cols-[1.1fr_1fr] gap-14 items-center">
+          <div>
+            <p className="eyebrow">URL shortener · analytics</p>
+            <h1 className="mt-4 text-4xl sm:text-5xl font-semibold tracking-[-0.03em] leading-[1.05] text-fg">
+              Short links, with the numbers behind them.
+            </h1>
+            <p className="mt-5 text-base sm:text-lg text-muted max-w-lg leading-relaxed">
+              TinyGate turns long URLs into short, shareable links and shows you who clicked,
+              when, and from what device.
+            </p>
+            <div className="mt-8 flex flex-wrap items-center gap-3">
+              {isAuthenticated ? (
+                <Link to="/dashboard" className="btn-primary btn-lg">
+                  Open dashboard <ArrowRight className="w-4 h-4" />
+                </Link>
+              ) : (
+                <>
+                  <Link to="/register" className="btn-primary btn-lg">
+                    Create an account <ArrowRight className="w-4 h-4" />
+                  </Link>
+                  <Link to="/login" className="btn-secondary btn-lg">Sign in</Link>
+                </>
+              )}
+            </div>
+          </div>
+          <ProductPreview />
+        </section>
+
+        {/* Features */}
+        <section className="border-t border-line bg-surface">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 py-20">
+            <div className="max-w-xl">
+              <h2 className="text-2xl font-semibold tracking-tight">What you get</h2>
+              <p className="text-muted mt-2">
+                The essentials for sharing links and understanding how they perform. Nothing more.
+              </p>
+            </div>
+            <div className="mt-12 grid sm:grid-cols-2 lg:grid-cols-3 gap-x-10 gap-y-10">
+              {FEATURES.map(({ icon: Icon, title, body }) => (
+                <div key={title}>
+                  <div className="w-8 h-8 rounded-md border border-line bg-canvas flex items-center justify-center">
+                    <Icon className="w-4 h-4 text-fg" strokeWidth={1.75} />
+                  </div>
+                  <h3 className="mt-4 text-sm font-medium text-fg">{title}</h3>
+                  <p className="mt-1.5 text-sm text-muted leading-relaxed">{body}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* How it works */}
+        <section className="border-t border-line">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 py-20 grid lg:grid-cols-3 gap-10">
+            <div>
+              <h2 className="text-2xl font-semibold tracking-tight">How it works</h2>
+              <p className="text-muted mt-2">Three steps, about ten seconds.</p>
+            </div>
+            <ol className="lg:col-span-2 grid sm:grid-cols-3 gap-6">
+              {[
+                ['Paste', 'Drop in any http or https URL. Optionally set an alias and expiry.'],
+                ['Share', 'Copy the short link or download its QR code.'],
+                ['Measure', 'Every click is logged with device, browser, OS and referrer.'],
+              ].map(([t, b], i) => (
+                <li key={t} className="border-t border-line-strong pt-4">
+                  <span className="font-mono text-2xs text-faint">0{i + 1}</span>
+                  <h3 className="mt-2 text-sm font-medium">{t}</h3>
+                  <p className="mt-1.5 text-sm text-muted leading-relaxed">{b}</p>
+                </li>
+              ))}
+            </ol>
+          </div>
+        </section>
+      </main>
+
+      <footer className="border-t border-line">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between text-[13px] text-muted">
+          <div className="flex items-center gap-2">
+            <LogoMark className="w-4 h-4" />
+            <span>© {new Date().getFullYear()} TinyGate</span>
+          </div>
+          <a href="https://github.com/AkshatRaj2004" target="_blank" rel="noreferrer" className="hover:text-fg transition-colors">
+            GitHub
+          </a>
+        </div>
+      </footer>
+    </div>
+  );
+};
 
 export default Home;

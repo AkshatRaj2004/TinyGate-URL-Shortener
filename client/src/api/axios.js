@@ -22,7 +22,9 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
+    // A 401 from login/register just means bad credentials; let the form show it.
+    const isAuthAttempt = /\/api\/auth\/(login|register)/.test(error.config?.url || '');
+    if (error.response?.status === 401 && !isAuthAttempt) {
       localStorage.removeItem('tg_token');
       localStorage.removeItem('tg_user');
       window.location.href = '/login';

@@ -1,24 +1,26 @@
-import { formatNumber } from '../../utils/helpers';
+import { Skeleton } from '../ui/Loader';
 
-const StatCard = ({ label, value, icon, gradient, trend }) => (
-  <div
-    className="stat-card"
-    style={{ '--card-gradient': gradient }}
-  >
-    <div className="flex items-start justify-between mb-4">
-      <div className="w-11 h-11 rounded-xl flex items-center justify-center text-white"
-        style={{ background: gradient?.replace('linear-gradient(135deg,', '').replace(')', '') || 'rgba(147,51,234,0.2)' }}>
-        {icon}
+/**
+ * A single bordered strip of metrics, divided into cells.
+ * items: [{ label, value, hint? }]
+ */
+export const StatsRow = ({ items, loading }) => (
+  <div className="card grid grid-cols-2 lg:grid-cols-4 [&>*]:border-line">
+    {items.map((s, i) => (
+      <div
+        key={s.label}
+        className={`p-4 sm:p-5 ${i % 2 === 1 ? 'border-l' : ''} ${i >= 2 ? 'border-t lg:border-t-0' : ''} ${i === 2 ? 'lg:border-l' : ''}`}
+      >
+        <p className="text-[13px] text-muted">{s.label}</p>
+        {loading ? (
+          <Skeleton className="h-7 w-16 mt-1.5" />
+        ) : (
+          <p className="mt-1 text-2xl font-semibold tracking-tight tabular-nums text-fg">{s.value}</p>
+        )}
+        {s.hint && <p className="text-2xs text-faint mt-1">{s.hint}</p>}
       </div>
-      {trend !== undefined && (
-        <span className={`badge ${trend >= 0 ? 'badge-success' : 'badge-danger'}`}>
-          {trend >= 0 ? '↑' : '↓'} {Math.abs(trend)}%
-        </span>
-      )}
-    </div>
-    <p className="text-3xl font-bold text-white mb-1">{formatNumber(value)}</p>
-    <p className="text-sm text-gray-400">{label}</p>
+    ))}
   </div>
 );
 
-export default StatCard;
+export default StatsRow;

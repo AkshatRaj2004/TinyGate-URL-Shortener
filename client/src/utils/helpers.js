@@ -68,16 +68,21 @@ export const formatNumber = (n) => {
   return String(n ?? 0);
 };
 
-// ── Color palette for charts ─────────────────────────────────────────────────
-export const CHART_COLORS = [
-  'rgba(147, 51, 234, 0.8)',
-  'rgba(99,  102, 241, 0.8)',
-  'rgba(236, 72,  153, 0.8)',
-  'rgba(16,  185, 129, 0.8)',
-  'rgba(245, 158, 11,  0.8)',
-  'rgba(59,  130, 246, 0.8)',
-  'rgba(239, 68,  68,  0.8)',
-  'rgba(20,  184, 166, 0.8)',
-];
+// ── Short URL ────────────────────────────────────────────────────────────────
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
-export const CHART_COLORS_BORDER = CHART_COLORS.map((c) => c.replace('0.8', '1'));
+/** Prefer the server-provided shortUrl (built from BASE_URL); fall back to the API host. */
+export const shortUrlFor = (url) => url?.shortUrl || `${API_BASE}/${url?.shortCode}`;
+
+/** "http://localhost:5000/abc" → "localhost:5000/abc" for display. */
+export const displayUrl = (url) => (url || '').replace(/^https?:\/\//, '');
+
+export const isExpired = (url) => !!url?.expiresAt && new Date(url.expiresAt) <= new Date();
+
+// ── Theme colours for canvas-based charts ────────────────────────────────────
+/** Reads a CSS token such as --accent ("37 99 235") and returns "rgba(37, 99, 235, a)". */
+export const cssColor = (name, alpha = 1) => {
+  const raw = getComputedStyle(document.documentElement).getPropertyValue(`--${name}`).trim();
+  const [r, g, b] = raw.split(/\s+/);
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+};
